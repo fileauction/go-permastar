@@ -1,3 +1,28 @@
+# 本地测试
+
+1. 在ipfs官网下载ipfs-desktop（https://github.com/ipfs/ipfs-desktop/releases），安装并启动（安装教程：https://docs.ipfs.tech/install/ipfs-desktop/#macos）；
+
+2. 在本地安装golang环境（https://go.dev/dl/），需安装go1.19.9版本，下载安装包时注意区分开发电脑的芯片架构
+
+3. 克隆代码并变异：
+   ```ssh
+   git clone https://github.com/fileauction/go-permastar.git
+   make build
+   ```
+
+4. 初始化permastar配置（默认配置目录为`~/.permastar/config.yaml`）：
+   ```
+   cd bin
+   ./permastar-server init
+   ```
+
+5. 启动permastar守护进程：
+   ```
+   ./permastar-server daemon
+   ```
+
+   
+
 # API文档
 
 
