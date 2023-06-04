@@ -8,5 +8,6 @@ type DirInfo struct {
 type FileInfo struct {
 	Path string `json:"path"`
 	Cid  string `json:"cid,omitempty"`
+	Size int    `json:"size,omitempty"`
 	Data []byte `json:"data,omitempty"`
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/kenlabs/permastar/pkg/api/types"
 	"github.com/kenlabs/permastar/pkg/api/v1/model"
@@ -18,8 +19,10 @@ func (a *API) registerDataAPI() {
 		dataAPI.GET("/dir", a.listDir)
 		dataAPI.POST("/dir", a.createDir)
 		dataAPI.DELETE("/dir", a.deleteDir)
+		dataAPI.GET("/file", a.downloadFile)
 		dataAPI.POST("/file", a.uploadFile)
 		dataAPI.DELETE("/file", a.deleteFile)
+		dataAPI.GET("/file/stat", a.statFile)
 	}
 }
 
@@ -91,6 +94,38 @@ func (a *API) deleteDir(ctx *gin.Context) {
 	ctx.JSON(200, types.NewOKResponse("OK", nil))
 }
 
+func (a *API) downloadFile(ctx *gin.Context) {
+	accountAddr, err := getAccountAddress(ctx)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	reqBody, err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	fileInfo := &model.FileInfo{}
+	if err = json.Unmarshal(reqBody, fileInfo); err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	data, err := a.controller.Core.IPFSNodeAPI.DownloadFile(context.Background(), fileInfo.Path, accountAddr)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	_, fileName := path.Split(fileInfo.Path)
+	ctx.Header("Content-Disposition", "attachment; filename="+fileName)
+	ctx.Header("Content-Type", "application/text/plain")
+	ctx.Header("Accept-Length", fmt.Sprintf("%d", len(data)))
+	_, err = ctx.Writer.Write(data)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+}
+
 func (a *API) uploadFile(ctx *gin.Context) {
 	accountAddr, err := getAccountAddress(ctx)
 	if err != nil {
@@ -154,6 +189,31 @@ func (a *API) deleteFile(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, types.NewOKResponse("OK", nil))
+}
+
+func (a *API) statFile(ctx *gin.Context) {
+	accountAddr, err := getAccountAddress(ctx)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	reqBody, err := io.ReadAll(ctx.Request.Body)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	fileInfo := &model.FileInfo{}
+	if err = json.Unmarshal(reqBody, fileInfo); err != nil {
+		HandleError(ctx, err)
+		return
+	}
+
+	fileStat, err := a.controller.Core.IPFSNodeAPI.GetFileStat(context.Background(), fileInfo.Path, accountAddr)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+	ctx.JSON(200, types.NewOKResponse("OK", fileStat))
 }
 
 func getAccountAddress(ctx *gin.Context) (string, error) {

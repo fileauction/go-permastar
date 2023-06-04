@@ -44,6 +44,18 @@ func (a *API) DeleteDir(ctx context.Context, path string, accountAddr string) er
 	return a.Shell.FilesRm(ctx, "/"+accountAddr+path, true)
 }
 
+func (a *API) DownloadFile(ctx context.Context, dstPath string, accountAddr string) ([]byte, error) {
+	reader, err := a.Shell.FilesRead(ctx, path.Join("/", accountAddr, dstPath), ipfs_api.FilesRead.Offset(0))
+	if err != nil {
+		return nil, err
+	}
+	respBytes, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+	return respBytes, nil
+}
+
 func (a *API) CreateFile(ctx context.Context, dstPath string, data io.Reader, accountAddr string) error {
 	return a.Shell.FilesWrite(ctx, path.Join("/", accountAddr, dstPath), data, ipfs_api.FilesWrite.Create(true))
 }
@@ -74,4 +86,17 @@ func (a *API) GetObjectCid(ctx context.Context, path string) (cid.Cid, error) {
 		return cid.Undef, err
 	}
 	return cidEntry, nil
+}
+
+func (a *API) GetFileStat(ctx context.Context, dstPath string, accountAddr string) (*model.FileInfo, error) {
+	fileStat, err := a.Shell.FilesStat(ctx, path.Join("/", accountAddr, dstPath), ipfs_api.FilesStat.WithLocal(true))
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.FileInfo{
+		Path: dstPath,
+		Cid:  fileStat.Hash,
+		Size: int(fileStat.Size),
+	}, nil
 }
