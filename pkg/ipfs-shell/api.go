@@ -19,10 +19,12 @@ type API struct {
 }
 
 func NewIPFSNodeShell(gateway string) *API {
+	logger.Infof("Init IPFS node shell " + gateway)
 	return &API{ipfs_api.NewShell(gateway)}
 }
 
 func (a *API) NewRootDIRForUser(ctx context.Context, accountAddr string) error {
+	logger.Infof(fmt.Sprintf("IPFS node is up: %v\n", a.Shell.IsUp()))
 	return a.Shell.FilesMkdir(ctx, "/"+accountAddr)
 }
 
