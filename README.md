@@ -4,7 +4,7 @@
 
 2. 在本地安装golang环境（https://go.dev/dl/），需安装go1.19.9版本，下载安装包时注意区分开发电脑的芯片架构
 
-3. 克隆代码并变异：
+3. 克隆代码并编译：
    ```ssh
    git clone https://github.com/fileauction/go-permastar.git
    make build
