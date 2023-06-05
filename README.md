@@ -21,6 +21,18 @@
    ./permastar-server daemon
    ```
 
+6. 默认监听地址：
+
+   http://127.0.0.1:9000
+
+   若要更改监听地址或端口，修改`~/.permastar/config.yml`中的配置项即刻
+
+   ```
+   IPFSNode:
+     GatewayIP: 127.0.0.1
+     GatewayPort: "5001"
+   ```
+
    
 
 # API文档
