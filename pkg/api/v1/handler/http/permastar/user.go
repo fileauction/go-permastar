@@ -11,6 +11,7 @@ import (
 
 func (a *API) registerUserAPI() {
 	a.router.POST("/user", a.userRegister)
+	a.router.DELETE("/user", a.userDelete)
 }
 
 func (a *API) userRegister(ctx *gin.Context) {
@@ -25,4 +26,19 @@ func (a *API) userRegister(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, types.NewOKResponse("OK", nil))
+}
+
+func (a *API) userDelete(ctx *gin.Context) {
+	accountAddr, err := getAccountAddress(ctx)
+	if err != nil {
+		HandleError(ctx, err)
+		return
+	}
+
+	if err = a.controller.Core.IPFSNodeAPI.DeleteDir(ctx, "", accountAddr); err != nil {
+		HandleError(ctx, err)
+		return
+	}
+
+	ctx.JSON(200, types.NewOKResponse("OK", nil))
 }

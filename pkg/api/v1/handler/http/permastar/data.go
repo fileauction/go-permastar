@@ -33,7 +33,7 @@ func (a *API) listDir(ctx *gin.Context) {
 		return
 	}
 	path := ctx.Param("path")
-	entries, err := a.controller.Core.IPFSNodeAPI.ListFilesInPath(context.Background(), path, accountAddr)
+	entries, err := a.controller.ListDir(ctx, path, accountAddr)
 	if err != nil {
 		HandleError(ctx, err)
 		return
@@ -162,6 +162,7 @@ func (a *API) uploadFile(ctx *gin.Context) {
 			return
 		}
 	}
+
 	ctx.JSON(200, types.NewOKResponse("OK", nil))
 }
 
